@@ -44,8 +44,5 @@ export function initMortgageCalculator(elementId: string) {
 
 // Auto-initialize if in standalone mode
 if (import.meta.env.DEV) {
-  const element = document.getElementById('mortgage-calculator');
-  if (element) {
-    initMortgageCalculator('mortgage-calculator');
-  }
+  initMortgageCalculator('mortgage-calculator');
 }
