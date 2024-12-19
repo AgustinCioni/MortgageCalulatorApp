@@ -1,40 +1,55 @@
-import { createRoot } from 'react-dom/client';
 import React from 'react';
+import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 
+// Keep track of root instances
+const roots = new Map<string, ReactDOM.Root>();
+
 class MortgageCalculatorWidget {
-  private root: ReturnType<typeof createRoot> | null = null;
+  private elementId: string;
 
   constructor(elementId: string) {
-    const container = document.getElementById(elementId);
+    this.elementId = elementId;
+    this.initialize();
+  }
+
+  private initialize() {
+    const container = document.getElementById(this.elementId);
     if (!container) {
-      console.warn(`Element with id "${elementId}" not found`);
+      console.warn(`Element with id "${this.elementId}" not found`);
       return;
     }
 
-    this.root = createRoot(container);
+    // Check if a root already exists for this container
+    if (!roots.has(this.elementId)) {
+      roots.set(this.elementId, ReactDOM.createRoot(container));
+    }
+    
     this.render();
   }
 
   private render() {
-    if (!this.root) return;
+    const root = roots.get(this.elementId);
+    if (!root) return;
     
-    this.root.render(
-      React.createElement(React.StrictMode, null,
-        React.createElement(App)
-      )
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
     );
   }
 
   destroy() {
-    if (this.root) {
-      this.root.unmount();
-      this.root = null;
+    const root = roots.get(this.elementId);
+    if (root) {
+      root.unmount();
+      roots.delete(this.elementId);
     }
   }
 }
 
+// Export initialization function
 export function initMortgageCalculator(elementId: string) {
   return new MortgageCalculatorWidget(elementId);
 }
@@ -42,7 +57,14 @@ export function initMortgageCalculator(elementId: string) {
 // Make it globally available
 (window as any).initMortgageCalculator = initMortgageCalculator;
 
-// Auto-initialize if in standalone mode
+// Initialize in development mode
 if (import.meta.env.DEV) {
-  initMortgageCalculator('mortgage-calculator');
+  const elementId = 'mortgage-calculator';
+  const existingWidget = (window as any).mortgageCalculatorInstance;
+  
+  if (existingWidget) {
+    existingWidget.destroy();
+  }
+  
+  (window as any).mortgageCalculatorInstance = initMortgageCalculator(elementId);
 }

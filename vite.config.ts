@@ -1,25 +1,30 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    port: 3000
+  },
   build: {
     outDir: 'dist',
+    assetsDir: 'assets',
     lib: {
-      entry: 'src/main.tsx', // Entry file for your widget
+      entry: 'src/main.tsx',
       name: 'MortgageCalculator',
-      fileName: () => 'mortgage-calculator.js',
-      formats: ['umd'], // Use UMD for embeddable script
+      formats: ['umd'],
+      fileName: () => 'index.js'
     },
     rollupOptions: {
-      external: ['react', 'react-dom'], // Ensure React and React DOM are externalized
+      external: ['react', 'react-dom'],
       output: {
         globals: {
           react: 'React',
-          'react-dom': 'ReactDOM',
+          'react-dom': 'ReactDOM'
         },
-      },
-    },
-  },
-});
-
+        format: 'umd',
+        name: 'MortgageCalculator'
+      }
+    }
+  }
+})
